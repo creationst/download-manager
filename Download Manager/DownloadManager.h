@@ -146,7 +146,8 @@
  * @see url
  */
 
-- (void)addDownloadWithFilename:(NSString *)filename URL:(NSURL *)url;
+//- (void)addDownloadWithFilename:(NSString *)filename URL:(NSURL *)url;
+//- (void)addDownloadWithURL:(NSURL *)url;
 
 /// Starts the queued downloads.
 

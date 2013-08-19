@@ -72,6 +72,12 @@
 
 - (void)downloadDidReceiveData:(Download *)download;
 
+
+
+
+
+- (void)downloadDidStartDownloading:(Download *)download;
+
 @end
 
 /** The `Download` is a class to download a single file using `NSURLConnection`. 
@@ -105,6 +111,7 @@
  */
 
 @property (nonatomic, weak) id<DownloadDelegate> delegate;
+@property (nonatomic, weak) id<DownloadDelegate> downloadManagerDelegate;
 
 /// `BOOL` property designating whether this download is in progress or not.
 
@@ -128,6 +135,12 @@
 
 @property (nonatomic, strong) NSError *error;
 
+/// The path in wich the faile has been downloaded
+
+@property (strong, nonatomic) NSString *downloadedFilePath;
+
+@property float downloadedProgress;
+
 /// @name Initialization
 
 /** Returns pointer to `Download` object and initiates download from `url`, saving the file to `filename`.
@@ -146,7 +159,9 @@
  *
  */
 
-- (id)initWithFilename:(NSString *)filename URL:(NSURL *)url delegate:(id<DownloadDelegate>)delegate;
+//- (id)initWithFilename:(NSString *)filename URL:(NSURL *)url delegate:(id<DownloadDelegate>)delegate;
+- (id)initWithURL:(NSURL *)url delegate:(id<DownloadDelegate>)delegate andDownloadManagerDelegate:(id<DownloadDelegate>) DMDelegate; //Uses the destination path the same name as the temporary file (inside /DownloadedItems/)
+
 
 /// @name Control
 

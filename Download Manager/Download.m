@@ -33,8 +33,23 @@
 @end
 
 @implementation Download
+@synthesize downloadedFilePath;
 
 #pragma mark - Public methods
+
+- (id)initWithURL:(NSURL *)url delegate:(id<DownloadDelegate>)delegate andDownloadManagerDelegate:(id<DownloadDelegate>) DMDelegate
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _url = url;
+        _delegate = delegate;
+        _downloadManagerDelegate = DMDelegate;
+    }
+    
+    return self;
+}
 
 - (id)initWithFilename:(NSString *)filename URL:(NSURL *)url delegate:(id<DownloadDelegate>)delegate
 {
@@ -52,15 +67,19 @@
 
 - (void)start
 {
+    if ([_delegate respondsToSelector:@selector(downloadDidStartDownloading:)])
+        [_delegate  downloadDidStartDownloading:self];
+        
     // initialize progress variables
     
     self.downloading = YES;
     self.expectedContentLength = -1;
     self.progressContentLength = 0;
+    self.downloadedProgress = 0;
     
     // create the download file stream (so we can write the file as we download it
     
-    self.tempFilename = [self pathForTemporaryFileWithPrefix:@"downloads"];
+    self.tempFilename = [self pathForTemporaryFileWithPrefix:@"download"];
     self.downloadStream = [NSOutputStream outputStreamToFileAtPath:self.tempFilename append:NO];
     if (!self.downloadStream)
     {
@@ -107,13 +126,17 @@
     NSError *error;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *folder = [filePath stringByDeletingLastPathComponent];
+    
+    NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *privateDocs = [libraryDirectory stringByAppendingPathComponent:folder];
+    
     BOOL isDirectory;
     
-    if (![fileManager fileExistsAtPath:folder isDirectory:&isDirectory])
+    if (![fileManager fileExistsAtPath:privateDocs isDirectory:&isDirectory])
     {
         // if folder doesn't exist, try to create it
         
-        [fileManager createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:&error];
+        [fileManager createDirectoryAtPath:privateDocs withIntermediateDirectories:YES attributes:nil error:&error];
         
         // if fail, report error
 
@@ -165,28 +188,45 @@
     
     if (success)
     {
-        if (![self createFolderForPath:self.filename])
+        NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+        
+        NSString *privateFilePath = [NSString stringWithFormat:@"/DownloadedItems/%@", [self.tempFilename lastPathComponent]];
+        
+        NSString *completeFilePath = [libraryDirectory stringByAppendingString:privateFilePath];
+        
+        //Add the extension to the file path
+        if (![[_url pathExtension] isEqualToString:@""] && [_url pathExtension] != nil) {
+            completeFilePath = [completeFilePath stringByAppendingPathExtension:[_url pathExtension]];
+        }
+        
+        DLog(@"FILENAME ADDRESS temporal: %@", self.tempFilename);
+        DLog(@"FILENAME ADDRESS to copy the item: %@", completeFilePath);
+        
+        if (![self createFolderForPath:privateFilePath])
         {
             [self.delegate downloadDidFail:self];
+            [self.downloadManagerDelegate downloadDidFail:self];
             return;
         }
 
-        if ([fileManager fileExistsAtPath:self.filename])
+        if ([fileManager fileExistsAtPath:completeFilePath])
         {
-            [fileManager removeItemAtPath:self.filename error:&error];
+            [fileManager removeItemAtPath:completeFilePath error:&error];
             if (error)
             {
                 self.error = error;
                 [self.delegate downloadDidFail:self];
+                [self.downloadManagerDelegate downloadDidFail:self];
                 return;
             }
         }
         
-        [fileManager copyItemAtPath:self.tempFilename toPath:self.filename error:&error];
+        [fileManager copyItemAtPath:self.tempFilename toPath:completeFilePath error:&error];
         if (error)
         {
             self.error = error;
             [self.delegate downloadDidFail:self];
+            [self.downloadManagerDelegate downloadDidFail:self];
             return;
         }
 
@@ -195,10 +235,14 @@
         {
             self.error = error;
             [self.delegate downloadDidFail:self];
+            [self.downloadManagerDelegate downloadDidFail:self];
             return;
         }
+        
+        self.downloadedFilePath = completeFilePath;
 
         [self.delegate downloadDidFinishLoading:self];
+        [self.downloadManagerDelegate downloadDidFinishLoading:self];
     }
     else
     {
@@ -207,6 +251,7 @@
                 [fileManager removeItemAtPath:self.tempFilename error:&error];
         
         [self.delegate downloadDidFail:self];
+        [self.downloadManagerDelegate downloadDidFail:self];
     }
 }
 
@@ -244,6 +289,7 @@
         if (statusCode == 200)
         {
             self.expectedContentLength = [response expectedContentLength];
+            NSLog(@"EXPECTED CONTENT: %lld", self.expectedContentLength);
         }
         else if (statusCode >= 400)
         {
@@ -284,8 +330,13 @@
     
     self.progressContentLength += dataLength;
     
+    self.downloadedProgress = (float)((float)self.progressContentLength / (float)self.expectedContentLength);
+    
     if ([self.delegate respondsToSelector:@selector(downloadDidReceiveData:)])
         [self.delegate downloadDidReceiveData:self];
+    
+    if ([self.downloadManagerDelegate respondsToSelector:@selector(downloadDidReceiveData:)])
+        [self.downloadManagerDelegate downloadDidReceiveData:self];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection

@@ -40,7 +40,7 @@
     if (self)
     {
         _downloads = [[NSMutableArray alloc] init];
-        _maxConcurrentDownloads = 12;
+        _maxConcurrentDownloads = 1;
     }
     
     return self;
@@ -48,12 +48,13 @@
 
 #pragma mark - DownloadManager public methods
 
-- (void)addDownloadWithFilename:(NSString *)filename URL:(NSURL *)url
-{
-    Download *download = [[Download alloc] initWithFilename:filename URL:url delegate:self];
-    
-    [self.downloads addObject:download];
-}
+
+//- (void)addDownloadWithFilename:(NSString *)filename URL:(NSURL *)url
+//{
+//    Download *download = [[Download alloc] initWithFilename:filename URL:url delegate:self];
+//    
+//    [self.downloads addObject:download];
+//}
 
 - (void)start
 {
@@ -119,6 +120,10 @@
     {
         [self.delegate downloadManager:self downloadDidReceiveData:download];
     }
+}
+
+- (void)downloadDidStartDownloading:(Download *)download
+{
 }
 
 #pragma mark - Private methods
