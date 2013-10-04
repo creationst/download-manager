@@ -103,15 +103,23 @@
         return;
     }
     
-    self.connection = [NSURLConnection connectionWithRequest:request delegate:self];
-    if (!self.connection)
-    {
-        self.error = [NSError errorWithDomain:[NSBundle mainBundle].bundleIdentifier
-                                         code:-1
-                                     userInfo:@{@"message": @"Unable to create NSURLConnection", @"function" : @(__FUNCTION__), @"NSURLRequest" : request}];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        [self cleanupConnectionSuccessful:NO];
-    }
+        self.connection = [NSURLConnection connectionWithRequest:request delegate:self];
+        
+        CFRunLoopRun(); // Avoid thread exiting
+        
+        
+        if (!self.connection)
+        {
+            self.error = [NSError errorWithDomain:[NSBundle mainBundle].bundleIdentifier
+                                             code:-1
+                                         userInfo:@{@"message": @"Unable to create NSURLConnection", @"function" : @(__FUNCTION__), @"NSURLRequest" : request}];
+            
+            [self cleanupConnectionSuccessful:NO];
+        }
+        
+    });
 }
 
 - (void)cancel
@@ -342,6 +350,8 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
     [self cleanupConnectionSuccessful:YES];
+    
+    CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
@@ -349,6 +359,8 @@
     self.error = error;
     
     [self cleanupConnectionSuccessful:NO];
+    
+    CFRunLoopStop(CFRunLoopGetCurrent());
 }
 
 @end
