@@ -107,9 +107,6 @@
         
         self.connection = [NSURLConnection connectionWithRequest:request delegate:self];
         
-        CFRunLoopRun(); // Avoid thread exiting
-        
-        
         if (!self.connection)
         {
             self.error = [NSError errorWithDomain:[NSBundle mainBundle].bundleIdentifier
@@ -118,6 +115,8 @@
             
             [self cleanupConnectionSuccessful:NO];
         }
+        
+        CFRunLoopRun(); // Avoid thread exiting
         
     });
 }
