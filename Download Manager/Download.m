@@ -204,7 +204,8 @@
         //Add the extension to the file path
         if (![[_url pathExtension] isEqualToString:@""] && [_url pathExtension] != nil) {
             completeFilePath = [completeFilePath stringByAppendingPathExtension:[_url pathExtension]];
-        }
+        }else
+            completeFilePath = [completeFilePath stringByAppendingPathExtension:@"mp4"]; //CUIDADO!!! Esto lo he añadido para los videos descargados de YouTube que no tenemos extension!!!
         
         DLog(@"FILENAME ADDRESS temporal: %@", self.tempFilename);
         DLog(@"FILENAME ADDRESS to copy the item: %@", completeFilePath);
