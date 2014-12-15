@@ -91,7 +91,10 @@
 
 - (void)downloadDidFinishLoading:(Download *)download
 {
-    [self.downloads removeObject:download];
+    @synchronized(self.downloads)
+    {
+        [self.downloads removeObject:download];
+    }
     
     if ([self.delegate respondsToSelector:@selector(downloadManager:downloadDidFinishLoading:)])
     {
@@ -103,7 +106,10 @@
 
 - (void)downloadDidFail:(Download *)download
 {
-    [self.downloads removeObject:download];
+    @synchronized(self.downloads)
+    {
+        [self.downloads removeObject:download];
+    }
 
     if ([self.delegate respondsToSelector:@selector(downloadManager:downloadDidFail:)])
         [self.delegate downloadManager:self downloadDidFail:download];
@@ -149,15 +155,17 @@
     }
     
     // while there are downloads waiting to be started and we haven't hit the maxConcurrentDownloads, then start
-    
-    while ([self countUnstartedDownloads] > 0 && [self countActiveDownloads] < self.maxConcurrentDownloads)
+    @synchronized(self.downloads)
     {
-        for (Download *download in self.downloads)
+        while ([self countUnstartedDownloads] > 0 && [self countActiveDownloads] < self.maxConcurrentDownloads)
         {
-            if (!download.isDownloading)
+            for (Download *download in self.downloads)
             {
-                [download start];
-                break;
+                if (!download.isDownloading)
+                {
+                    [download start];
+                    break;
+                }
             }
         }
     }
@@ -172,10 +180,13 @@
 {
     NSInteger activeDownloadCount = 0;
     
-    for (Download *download in self.downloads)
+    @synchronized(self.downloads)
     {
-        if (download.isDownloading)
-            activeDownloadCount++;
+        for (Download *download in self.downloads)
+        {
+            if (download.isDownloading)
+                activeDownloadCount++;
+        }
     }
     
     return activeDownloadCount;
