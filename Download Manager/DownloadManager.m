@@ -157,7 +157,7 @@
     // while there are downloads waiting to be started and we haven't hit the maxConcurrentDownloads, then start
     @synchronized(self.downloads)
     {
-        while ([self countUnstartedDownloads] > 0 && [self countActiveDownloads] < self.maxConcurrentDownloads)
+        while ([self countUnstartedDownloads] > 0 && [self countActiveDownloads] < self.maxConcurrentDownloads && self.downloads)
         {
             for (Download *download in self.downloads)
             {
