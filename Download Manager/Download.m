@@ -24,6 +24,9 @@
 
 #import "Download.h"
 
+#define CREATION_GROUP_NAME      @"group.Creation"
+#define DOWNLOAD_FOLDER          @"DownloadedItems"
+
 @interface Download () <NSURLConnectionDelegate>
 
 @property (strong, nonatomic) NSOutputStream *downloadStream;
@@ -132,10 +135,12 @@
 {
     NSError *error;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *folder = [filePath stringByDeletingLastPathComponent];
+//    NSString *folder = [filePath stringByDeletingLastPathComponent];
+//    
+//    NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+//    NSString *privateDocs = [libraryDirectory stringByAppendingPathComponent:folder];
     
-    NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-    NSString *privateDocs = [libraryDirectory stringByAppendingPathComponent:folder];
+    NSString *privateDocs = [filePath stringByDeletingLastPathComponent];
     
     BOOL isDirectory;
     
@@ -161,7 +166,7 @@
     {
         self.error = [NSError errorWithDomain:[NSBundle mainBundle].bundleIdentifier
                                          code:-1
-                                     userInfo:@{@"message": @"Unable to create directory; file exists by that name", @"function" : @(__FUNCTION__), @"folder": folder}];
+                                     userInfo:@{@"message": @"Unable to create directory; file exists by that name", @"function" : @(__FUNCTION__), @"folder": filePath}];
         return FALSE;
     }
     
@@ -195,11 +200,16 @@
     
     if (success)
     {
-        NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
         
-        NSString *privateFilePath = [NSString stringWithFormat:@"/DownloadedItems/%@", [self.tempFilename lastPathComponent]];
+        NSFileManager *fm = [NSFileManager new];
+        NSURL *appGroupDirectoryPath = [fm containerURLForSecurityApplicationGroupIdentifier:CREATION_GROUP_NAME];
+        NSString *privateFilePath = [NSString stringWithFormat:@"%@/%@", DOWNLOAD_FOLDER, [self.tempFilename lastPathComponent]];
+        NSURL *completeURL = [appGroupDirectoryPath URLByAppendingPathComponent:privateFilePath];
+        NSString *completeFilePath = [completeURL path];
         
-        NSString *completeFilePath = [libraryDirectory stringByAppendingString:privateFilePath];
+//        NSString *libraryDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+//        NSString *privateFilePath = [NSString stringWithFormat:@"/%@/%@", DOWNLOAD_FOLDER, [self.tempFilename lastPathComponent]];
+//        NSString *completeFilePath = [libraryDirectory stringByAppendingString:privateFilePath];
         
         //Add the extension to the file path
         if (![[_url pathExtension] isEqualToString:@""] && [_url pathExtension] != nil) {
@@ -210,7 +220,7 @@
         DLog(@"FILENAME ADDRESS temporal: %@", self.tempFilename);
         DLog(@"FILENAME ADDRESS to copy the item: %@", completeFilePath);
         
-        if (![self createFolderForPath:privateFilePath])
+        if (![self createFolderForPath:completeFilePath])
         {
             [self.delegate downloadDidFail:self];
             [self.downloadManagerDelegate downloadDidFail:self];
