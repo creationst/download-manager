@@ -23,9 +23,7 @@
 //  THE SOFTWARE.
 
 #import "Download.h"
-
-#define CREATION_GROUP_NAME      @"group.Creation"
-#define DOWNLOAD_FOLDER          @"DownloadedItems"
+#import "GlobalVariables.h"
 
 @interface Download () <NSURLConnectionDelegate>
 
