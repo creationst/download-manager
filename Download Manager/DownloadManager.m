@@ -58,7 +58,19 @@
 
 - (void)start
 {
-    [self tryDownloading];
+    if (![self isAlreadyDownloading])
+        [self tryDownloading];
+}
+
+
+-(BOOL) isAlreadyDownloading
+{
+    BOOL alreadyDownloading = NO;
+    for (Download *download in self.downloads) {
+        if ([download isDownloading])
+            alreadyDownloading = YES;
+    }
+    return alreadyDownloading;
 }
 
 - (void)cancelAll
