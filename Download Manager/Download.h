@@ -78,6 +78,9 @@
 
 - (void)downloadDidStartDownloading:(Download *)download;
 
+
+- (void)downloadStartWaiting:(Download *)download;
+
 @end
 
 /** The `Download` is a class to download a single file using `NSURLConnection`. 

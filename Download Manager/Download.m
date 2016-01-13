@@ -222,6 +222,11 @@
         {
             [self.delegate downloadDidFail:self];
             [self.downloadManagerDelegate downloadDidFail:self];
+            
+            //We remove the temp item before returning
+            if ([fileManager fileExistsAtPath:self.tempFilename])
+                [fileManager removeItemAtPath:self.tempFilename error:nil];
+            
             return;
         }
 
@@ -233,9 +238,20 @@
                 self.error = error;
                 [self.delegate downloadDidFail:self];
                 [self.downloadManagerDelegate downloadDidFail:self];
+                
+                //We remove the temp item before returning
+                if ([fileManager fileExistsAtPath:self.tempFilename])
+                    [fileManager removeItemAtPath:self.tempFilename error:nil];
+                
                 return;
             }
         }
+        
+        //For putting the circle animation before start copying because it takes some time to copy
+        //if the file is very large
+        if ([self.delegate respondsToSelector:@selector(downloadStartWaiting:)])
+            [self.delegate downloadStartWaiting:self];
+        
         
         [fileManager copyItemAtPath:self.tempFilename toPath:completeFilePath error:&error];
         if (error)
@@ -243,6 +259,11 @@
             self.error = error;
             [self.delegate downloadDidFail:self];
             [self.downloadManagerDelegate downloadDidFail:self];
+            
+            //We remove the temp item before returning
+            if ([fileManager fileExistsAtPath:self.tempFilename])
+                [fileManager removeItemAtPath:self.tempFilename error:nil];
+            
             return;
         }
 
