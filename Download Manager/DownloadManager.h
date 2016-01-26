@@ -172,7 +172,7 @@
  * @see Download
  */
 
-@property (nonatomic, strong) NSMutableArray *downloads;
+@property (atomic, strong) NSMutableArray *downloads;
 
 /** The delegate object that this class notifies regarding the progress of the individual downloads.
  *
