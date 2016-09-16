@@ -116,15 +116,15 @@
     [self tryDownloading];
 }
 
-- (void)downloadDidFail:(Download *)download
+- (void)downloadFailed:(Download *)download
 {
     @synchronized(self.downloads)
     {
         [self.downloads removeObject:download];
     }
 
-    if ([self.delegate respondsToSelector:@selector(downloadManager:downloadDidFail:)])
-        [self.delegate downloadManager:self downloadDidFail:download];
+    if ([self.delegate respondsToSelector:@selector(downloadManager:downloadFailed:)])
+        [self.delegate downloadManager:self downloadFailed:download];
 
     if (!self.cancelAllInProgress)
     {

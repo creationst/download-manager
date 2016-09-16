@@ -220,8 +220,8 @@
         
         if (![self createFolderForPath:completeFilePath])
         {
-            [self.delegate downloadDidFail:self];
-            [self.downloadManagerDelegate downloadDidFail:self];
+            [self.delegate downloadFailed:self];
+            [self.downloadManagerDelegate downloadFailed:self];
             
             //We remove the temp item before returning
             if ([fileManager fileExistsAtPath:self.tempFilename])
@@ -236,8 +236,8 @@
             if (error)
             {
                 self.error = error;
-                [self.delegate downloadDidFail:self];
-                [self.downloadManagerDelegate downloadDidFail:self];
+                [self.delegate downloadFailed:self];
+                [self.downloadManagerDelegate downloadFailed:self];
                 
                 //We remove the temp item before returning
                 if ([fileManager fileExistsAtPath:self.tempFilename])
@@ -257,8 +257,8 @@
         if (error)
         {
             self.error = error;
-            [self.delegate downloadDidFail:self];
-            [self.downloadManagerDelegate downloadDidFail:self];
+            [self.delegate downloadFailed:self];
+            [self.downloadManagerDelegate downloadFailed:self];
             
             //We remove the temp item before returning
             if ([fileManager fileExistsAtPath:self.tempFilename])
@@ -271,8 +271,8 @@
         if (error)
         {
             self.error = error;
-            [self.delegate downloadDidFail:self];
-            [self.downloadManagerDelegate downloadDidFail:self];
+            [self.delegate downloadFailed:self];
+            [self.downloadManagerDelegate downloadFailed:self];
             return;
         }
         
@@ -287,8 +287,8 @@
             if ([fileManager fileExistsAtPath:self.tempFilename])
                 [fileManager removeItemAtPath:self.tempFilename error:&error];
         
-        [self.delegate downloadDidFail:self];
-        [self.downloadManagerDelegate downloadDidFail:self];
+        [self.delegate downloadFailed:self];
+        [self.downloadManagerDelegate downloadFailed:self];
     }
 }
 

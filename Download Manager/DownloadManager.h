@@ -80,7 +80,7 @@
  * @see Download
  */
 
-- (void)downloadManager:(DownloadManager *)downloadManager downloadDidFail:(Download *)download;
+- (void)downloadManager:(DownloadManager *)downloadManager downloadFailed:(Download *)download;
 
 /** Informs the delegate of the status of a particular download that is in progress.
  *

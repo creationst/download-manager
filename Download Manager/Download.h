@@ -58,7 +58,7 @@
  *
  */
 
-- (void)downloadDidFail:(Download *)download;
+- (void)downloadFailed:(Download *)download;
 
 /** Called to notify delegate that the download completed.
  *
