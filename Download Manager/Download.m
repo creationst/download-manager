@@ -213,7 +213,16 @@
         if (![[_url pathExtension] isEqualToString:@""] && [_url pathExtension] != nil) {
             completeFilePath = [completeFilePath stringByAppendingPathExtension:[_url pathExtension]];
         }else
-            completeFilePath = [completeFilePath stringByAppendingPathExtension:@"mp4"]; //CUIDADO!!! Esto lo he añadido para los videos descargados de YouTube que no tenemos extension!!!
+        {
+            //completeFilePath = [completeFilePath stringByAppendingPathExtension:@"mp4"]; //CUIDADO!!! Esto lo he añadido para los videos descargados de YouTube que no tenemos extension!!!
+            
+            /* I added it for saving the correct extension in case we want */
+            if ([self.delegate respondsToSelector:@selector(getExtensionForSavingFile:)]) {
+                NSString *extension = [self.delegate getExtensionForSavingFile:self];
+                if ([extension length] > 0)
+                    completeFilePath = [completeFilePath stringByAppendingPathExtension:extension];
+            }
+        }
         
         DLog(@"FILENAME ADDRESS temporal: %@", self.tempFilename);
         DLog(@"FILENAME ADDRESS to copy the item: %@", completeFilePath);

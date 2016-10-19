@@ -81,6 +81,13 @@
 
 - (void)downloadStartWaiting:(Download *)download;
 
+
+/**
+ Marcos Álvarez
+ I added it because I need to know the extension of the file for saving it correctly
+ */
+- (NSString *) getExtensionForSavingFile:(Download *)download;
+
 @end
 
 /** The `Download` is a class to download a single file using `NSURLConnection`. 
